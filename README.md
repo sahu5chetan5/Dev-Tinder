@@ -5,7 +5,6 @@ DevTinder is a professional networking platform for developers, built with the M
 ## 🚀 Features
 
 - 🔍 Browse and connect with developer profiles
-- 💬 Real-time chat system for matched connections
 - 🧠 Intelligent matching based on technical skills, project interests, and collaboration goals
 - 📸 Professional profile customization with GitHub integration and portfolio showcase
 - 🔐 Secure authentication and authorization (JWT)
