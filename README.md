@@ -2,6 +2,11 @@
 
 DevTinder is a professional networking platform for developers, built with the MERN stack (MongoDB, Express.js, React.js, Node.js). It's designed to help developers find the perfect collaboration partners, whether you're looking for a project teammate, a mentor, or someone to pair program with. The platform uses an intuitive swipe-based interface to match developers based on their technical expertise, project interests, and professional goals.
 
+## 🌐 Live Demo
+
+The application is hosted and deployed on Render platform. You can access the live version here:
+[DevTinder Live Demo](https://dev-tinder-web.onrender.com/)
+
 ## 🚀 Features
 
 - 🔍 Browse and connect with developer profiles
