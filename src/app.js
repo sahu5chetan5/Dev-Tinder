@@ -3,9 +3,9 @@ const app = express()
 const connectDB = require("./config/database")
 const cookieParser = require("cookie-parser")
 const cors = require("cors")
-
+const PORT = process.env.PORT || 3000;
 app.use(cors({
-    origin:"http://localhost:5173",
+    origin:"https://dev-tinder-web.onrender.com",
     credentials:true
 }))
 app.use(express.json())
@@ -34,7 +34,7 @@ connectDB()
 .then(()=>{
     console.log("Database connection established")
 
-    app.listen(3000,()=>{
+    app.listen(PORT,()=>{
         console.log(`server is listening on this port ${3000}`) 
      });
      
