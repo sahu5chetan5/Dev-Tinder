@@ -4,7 +4,7 @@ const User = require("../models/user")
 const userAuth = async (req, res, next) => {
     try {
         // Try to get token from cookie first, then from Authorization header
-        const token = req.cookies.token || 
+        const token = req.cookies.token || req.cookies.sessionid || 
                      (req.headers.authorization && req.headers.authorization.startsWith('Bearer ') 
                         ? req.headers.authorization.split(' ')[1] 
                         : null);
@@ -17,7 +17,12 @@ const userAuth = async (req, res, next) => {
         }
 
         try {
-            const decodedObj = await jwt.verify(token, "DEV@TINDER$790")
+            // Verify token and check expiration
+            const decodedObj = await jwt.verify(token, "DEV@TINDER$790", { 
+                algorithms: ['HS256'],
+                ignoreExpiration: false 
+            })
+            
             const { _id } = decodedObj
             const user = await User.findById(_id)
             
@@ -31,6 +36,10 @@ const userAuth = async (req, res, next) => {
             req.user = user
             next()
         } catch (jwtError) {
+            // Clear invalid cookies
+            res.clearCookie("token", { path: '/' });
+            res.clearCookie("sessionid", { path: '/' });
+            
             return res.status(401).json({ 
                 message: "Invalid or expired token",
                 error: jwtError.message

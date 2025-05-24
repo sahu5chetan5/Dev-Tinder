@@ -96,7 +96,7 @@ authRouter.post("/logout", async(req, res) => {
         // Set cookie based on environment
         const isProduction = process.env.NODE_ENV === 'production';
         const cookieOptions = {
-            expires: new Date(Date.now()),
+            expires: new Date(0), // Set to past date to expire immediately
             httpOnly: true,
             path: '/',
             ...(isProduction ? {
@@ -109,7 +109,10 @@ authRouter.post("/logout", async(req, res) => {
             })
         };
         
-        res.cookie("token", "", cookieOptions)
+        // Clear both token and sessionid cookies
+        res.clearCookie("token", cookieOptions);
+        res.clearCookie("sessionid", cookieOptions);
+        
         res.status(200).json({ message: "Logout Successful !!!" })
     } catch(err) {
         res.status(400).json({ message: "Error during logout: " + err.message })
