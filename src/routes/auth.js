@@ -5,74 +5,115 @@ const User = require("../models/user")
 const bcrypt = require("bcrypt")
 
 
-authRouter.post("/signup",async (req,res)=>{
-    
-    try{
+authRouter.post("/signup", async (req, res) => {
+    try {
         validateSignUpData(req)
         const { firstName, lastName, emailId, password } = req.body;
-        const passwordHash = await bcrypt.hash(password,10)
-        
+        const passwordHash = await bcrypt.hash(password, 10)
         
         const user = new User({
-            firstName,lastName,emailId,password:passwordHash
+            firstName, lastName, emailId, password: passwordHash
         })
         const savedUser = await user.save()
         const token = await savedUser.getJWT();
-          
-            res.cookie("token",token,{
-                expires: new Date(Date.now()+8*3600000)
+        
+        // Set cookie based on environment
+        const isProduction = process.env.NODE_ENV === 'production';
+        const cookieOptions = {
+            expires: new Date(Date.now() + 8 * 3600000),
+            httpOnly: true,
+            path: '/',
+            ...(isProduction ? {
+                secure: true,
+                sameSite: 'none',
+                domain: '.onrender.com'
+            } : {
+                secure: false,
+                sameSite: 'lax'
             })
-            
-
-        res.json({message:"User added successfully", data: savedUser})
+        };
+        
+        res.cookie("token", token, cookieOptions)
+        
+        res.json({
+            message: "User added successfully",
+            data: savedUser,
+            token
+        })
+    } catch(err) {
+        res.status(400).json({ message: "ERROR: " + err.message })
     }
-    catch(err){
-        res.status(400).send("ERROR: "+ err.message)
-    }
-
 })
 
-authRouter.post("/login",async(req,res)=>{
-    try{
+authRouter.post("/login", async(req, res) => {
+    try {
+        const {emailId, password} = req.body
+        const user = await User.findOne({emailId: emailId})
 
-        const {emailId,password} =req.body
-
-        const user =await User.findOne({emailId:emailId})
-
-        if (!user){
+        if (!user) {
             throw new Error("Opss!!! Invalid credentials")
         }
+        
         const isPasswordValid = await user.validatePassword(password)
         
-        if(isPasswordValid){ 
-
+        if(isPasswordValid) { 
             const token = await user.getJWT();
-          
-            res.cookie("token",token,{
-                expires: new Date(Date.now()+8*3600000)
+            
+            // Set cookie based on environment
+            const isProduction = process.env.NODE_ENV === 'production';
+            const cookieOptions = {
+                expires: new Date(Date.now() + 8 * 3600000),
+                httpOnly: true,
+                path: '/',
+                ...(isProduction ? {
+                    secure: true,
+                    sameSite: 'none',
+                    domain: '.onrender.com'
+                } : {
+                    secure: false,
+                    sameSite: 'lax'
+                })
+            };
+            
+            res.cookie("token", token, cookieOptions)
+            
+            res.json({
+                user,
+                token,
+                message: "Login successful"
             })
-            res.send(user)
-
-        }else{
+        } else {
             throw new Error("Opss!!! Invalid credentials")
         }
-
-
-    }
-    catch(err){
-
- 
-        res.status(400).send("ERROR: "+ err.message) 
-
+    } catch(err) {
+        res.status(400).json({ message: "ERROR: " + err.message })
     }
 })
 
 
-authRouter.post("/logout",async(req,res)=>{
-    res.cookie("token",null,{
-        expires: new Date(Date.now()),
-    })
-    res.status(200).send("Logout Successfull !!!")
+authRouter.post("/logout", async(req, res) => {
+    try {
+        // Set cookie based on environment
+        const isProduction = process.env.NODE_ENV === 'production';
+        const cookieOptions = {
+            expires: new Date(Date.now()),
+            httpOnly: true,
+            path: '/',
+            ...(isProduction ? {
+                secure: true,
+                sameSite: 'none',
+                domain: '.onrender.com'
+            } : {
+                secure: false,
+                sameSite: 'lax'
+            })
+        };
+        
+        res.cookie("token", "", cookieOptions)
+        res.status(200).json({ message: "Logout Successful !!!" })
+    } catch(err) {
+        res.status(400).json({ message: "Error during logout: " + err.message })
+    }
 })
 
 
